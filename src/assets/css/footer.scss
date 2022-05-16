@@ -1,0 +1,36 @@
+.footer {
+  grid-area: footer;
+  padding: 1.25rem 14rem 0.5rem;
+  position: relative;
+  background-color: #4357ad;
+  color: #fff;
+  display: flex;
+  justify-self: space-between;
+  align-items: center;
+}
+
+.footer-right {
+  margin-left: auto;
+  padding-top: 10px;
+}
+
+.member-text {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.footer-left a,
+.footer-right a {
+  color: #cbd6e2;
+}
+.footer-left a:last-child {
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.footer-left a:hover,
+.footer-right a:hover {
+  color: orange;
+}

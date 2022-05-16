@@ -1,5 +1,16 @@
 .App {
-  text-align: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(auto, 90rem) minmax(0, 1fr);
+  grid-template-rows: min-content auto min-content;
+  grid-template-areas:
+    ". header ."
+    ". content ."
+    ". footer .";
+  background-color: #fff;
+}
+
+.App > * {
+  min-width: 0;
 }
 
 .App-logo {
