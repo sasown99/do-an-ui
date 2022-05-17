@@ -5,6 +5,7 @@ import displaCyENT from "../displacy-ent/assets/js/displacy-ent.js";
 import Select from "react-select";
 import axios from "axios";
 import { savePDF } from "@progress/kendo-react-pdf";
+import LoadingSpinner from "./LoadingSpinner";
 
 let dataReceived = [];
 let dataUpload = "";
@@ -17,6 +18,7 @@ export default function Content() {
   const [idLawSend, setIdLawSend] = useState(0);
   const [entities, setEntities] = useState([]);
   const [isChecked, setIsChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const refs = useRef([]);
   const contentArea = useRef(null);
 
@@ -44,35 +46,46 @@ export default function Content() {
   };
 
   const handleClickButtonSend = async () => {
-    if (isChecked && dataUpload !== "" && fileName !== "") {
-      let sentences = [];
-      // Split raw data into array
-      const array = dataUpload.match(/[^\r\n]+/g);
-      sentences = array.map((sentence) => ({
-        text: sentence,
-      }));
-      // send data to API
-      try {
-        const response = await axios({
-          method: "post",
-          url: "http://127.0.0.1:8000/ner",
-          header: {
-            "Content-Type": "application/json",
-          },
-          data: {
-            sentences,
-            fileName,
-          },
-        });
-        dataReceived = response.data.result;
-      } catch (error) {
-        console.log(error);
+    if (!isLoading) {
+      if (
+        isChecked &&
+        legalOptions.some((option) => {
+          return option.label === fileName.split(".txt")[0];
+        })
+      ) {
+        alert("Eror message : This file already exists");
+      } else if (isChecked && dataUpload !== "" && fileName !== "") {
+        setIsLoading(true);
+        let sentences = [];
+        // Split raw data into array
+        const array = dataUpload.match(/[^\r\n]+/g);
+        sentences = array.map((sentence) => ({
+          text: sentence,
+        }));
+        // send data to API
+        try {
+          const response = await axios({
+            method: "post",
+            url: "http://127.0.0.1:8000/ner",
+            header: {
+              "Content-Type": "application/json",
+            },
+            data: {
+              sentences,
+              fileName,
+            },
+          });
+          dataReceived = response.data.result;
+          setIsLoading(false);
+        } catch (error) {
+          console.log(error);
+        }
+        titleDoc = fileName.split(".")[0];
+      } else {
+        titleDoc = selectedOption?.label;
       }
-      titleDoc = fileName.split(".")[0];
-    } else {
-      titleDoc = selectedOption?.label;
+      setIdLawSend((pre) => pre + 1);
     }
-    setIdLawSend((pre) => pre + 1);
   };
 
   useEffect(() => {
@@ -85,10 +98,13 @@ export default function Content() {
         actualBtn.addEventListener("change", function (event) {
           fileChosen.textContent = this.files[0].name;
           fileName = this.files[0].name;
-
-          const input = event.target;
-          if ("files" in input && input.files.length > 0) {
-            placeFileContent(input.files[0]);
+          if (fileName.includes(".txt")) {
+            const input = event.target;
+            if ("files" in input && input.files.length > 0) {
+              placeFileContent(input.files[0]);
+            }
+          } else {
+            alert("Error message: please choose text file (.txt)");
           }
         });
       }
@@ -394,19 +410,25 @@ export default function Content() {
           </div>
         </header>
         <section className="s-content t-wrapper s-legal-content">
-          <div className="s-legal-title">
-            {titleDoc || "Please Choose Legal Documents !!!"}
-            {titleDoc && titleDoc !== "Not Found The Legal Document" && (
-              <button
-                className="btn-download"
-                onClick={handleExport}
-                title="download this document"
-              >
-                <i className="fa fa-download"></i>
-              </button>
-            )}
-          </div>
-          <div id="displacy" className="s-legal-text" ref={contentArea}></div>
+          {isLoading || (
+            <div className="s-legal-title">
+              {titleDoc || "Please Choose Legal Documents !!!"}
+              {titleDoc && titleDoc !== "Not Found The Legal Document" && (
+                <button
+                  className="btn-download"
+                  onClick={handleExport}
+                  title="download this document"
+                >
+                  <i className="fa fa-download"></i>
+                </button>
+              )}
+            </div>
+          )}
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <div id="displacy" className="s-legal-text" ref={contentArea}></div>
+          )}
         </section>
       </article>
     </div>
