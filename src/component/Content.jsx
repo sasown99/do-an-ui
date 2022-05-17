@@ -56,7 +56,7 @@ export default function Content() {
         alert("Eror message : This file already exists");
       } else if (isChecked && dataUpload !== "" && fileName !== "") {
         setIsLoading(true);
-        let sentences = [];
+        let sentences = []; 
         // Split raw data into array
         const array = dataUpload.match(/[^\r\n]+/g);
         sentences = array.map((sentence) => ({
